@@ -1,0 +1,19 @@
+grammar varDef;
+
+e :
+    Type str;
+
+str :
+    varA strA;
+
+strA :
+    Eof | Comma str;
+
+varA :
+    Pointer varA | Var;
+
+Type: "(int\\s)|(char\\s)|(float\\s)|(bool\\s)";
+Var: "[a-z]";
+Comma: "\\,";
+Eof: "(\\;[\\s]*$)";
+Pointer: "\\*";

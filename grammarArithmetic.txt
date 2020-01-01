@@ -1,0 +1,60 @@
+grammar arithmetic;
+
+e returns [int v]:
+    t {int u = t.v;}
+    ea[u] {res.v = ea.v;};
+
+ea [int a] returns [int v]:
+    EPSILON {} {res.v = a;}|
+    Plus t {int u = t.v;} plusTrans[a, u] {int acc = plusTrans.v;} ea[acc] {res.v = ea.v;}|
+    Minus t {int u = t.v;} minusTrans[a, u] {int acc = minusTrans.v;} ea[acc]
+    {
+    res.v = ea.v;
+    };
+
+minusTrans [int op1, int op2] returns [int v]:
+    EPSILON {} {res.v = op1 - op2;};
+
+plusTrans [int op1, int op2] returns [int v]:
+    EPSILON {} {res.v = op1 + op2;};
+
+t returns [int v]:
+    f {int u = f.v;} ta[u] {res.v = ta.v;};
+
+ta [int a] returns [int v]:
+    EPSILON {} {res.v = a;} | Mul f {int u = f.v;} mulTrans[a, u] {int acc = mulTrans.v;} ta[acc] {res.v = ta.v;}
+                            | Div f {int u = f.v;} divTrans[a, u] {int acc = divTrans.v;} ta[acc] {res.v = ta.v;};
+
+mulTrans [int op1, int op2] returns [int v]:
+    EPSILON {}{res.v = op1 * op2;};
+
+divTrans [int op1, int op2] returns [int v]:
+    EPSILON {}{res.v = java.lang.Math.round(op1 / op2);};
+
+f returns [int v]:
+    Num {int u = Integer.parseInt(lexicalAnalizer.getCurrString());} factOpA[u] {res.v = factOpA.v;}|
+    LBr e {int u = e.v;} RBr factOpA[u] {res.v = factOpA.v;};
+
+factOpA [int a] returns [int v]:
+    factOp factTrans[a]  {int u = factTrans.v;} factOpA[u] {res.v = factOpA.v;} | EPSILON {} {res.v = a;};
+
+factOp :
+    Fact;
+
+factTrans [int a] returns [int v]:
+    EPSILON {} { int acc = 1;
+    for (int i = 1; i <= a; i++) {
+        acc *= i;
+    }
+    res.v = acc;
+    };
+
+Num : "[1-9]+[0-9]*";
+EPSILON: "";
+Mul : "\\*";
+Plus : "\\+";
+LBr: "\\(";
+RBr: "\\)";
+Minus: "\\-";
+Div: "\\/";
+Fact: "\\!";
